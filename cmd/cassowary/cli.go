@@ -173,6 +173,8 @@ func validateCLI(c *cli.Context) error {
 			return err
 		}
 		data = fileData
+	} else if c.String("method") != "" {
+		httpMethod = c.String("method")
 	} else {
 		httpMethod = "GET"
 	}
@@ -351,6 +353,10 @@ func runCLI(args []string) {
 				&cli.StringFlag{
 					Name:  "key",
 					Usage: "client authentication key",
+				},
+				&cli.StringFlag{
+					Name:  "method",
+					Usage: "http method",
 				},
 			},
 			Action: validateCLI,

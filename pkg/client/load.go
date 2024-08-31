@@ -7,7 +7,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptrace"
@@ -107,11 +106,15 @@ func (c *Cassowary) runLoadTest(outPutChan chan<- durationMetrics, workerChan ch
 			log.Fatalf("%v", err)
 		}
 		if resp != nil {
-			_, err = io.Copy(ioutil.Discard, resp.Body)
-			if err != nil {
-				fmt.Println("Failed to read HTTP response body", err)
+			if c.HTTPMethod == "HEAD" {
+				resp.Body.Close() // early close since HEAD doesn't expect a body
+			} else {
+				_, err = io.Copy(io.Discard, resp.Body)
+				if err != nil {
+					fmt.Println("Failed to read HTTP response body", err)
+				}
+				resp.Body.Close()
 			}
-			resp.Body.Close()
 		}
 
 		if !c.DisableTerminalOutput {
